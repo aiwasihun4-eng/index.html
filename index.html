@@ -6,123 +6,155 @@
     <title>WASIHUN-AI | የወደፊት ቴክኖሎጂ</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
+        /* 1. የሚንቀሳቀስ ጀርባ (Animated Gradient) */
         body {
             margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif;
             background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
             background-size: 400% 400%;
-            animation: gradient 15s ease infinite;
+            animation: backgroundMove 15s ease infinite;
             height: 100vh; display: flex; justify-content: center; align-items: center; color: white; overflow: hidden;
         }
 
-        @keyframes gradient { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        @keyframes backgroundMove { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 
+        /* 2. WASIHUN-AI - ቀለም የሚቀያየርና የሚንቀሳቀስ */
         .logo-text {
-            font-size: 3rem; font-weight: bold;
-            background: linear-gradient(to right, #fff, #ffd700, #fff);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            margin-bottom: 10px; filter: drop-shadow(0 0 10px rgba(255,255,255,0.5));
-            animation: moveLogo 3s ease-in-out infinite; display: inline-block;
+            font-size: 3.5rem; font-weight: bold; margin-bottom: 15px;
+            display: inline-block;
+            animation: float 3s ease-in-out infinite, rainbow 8s linear infinite;
+            text-shadow: 0 0 15px rgba(255,255,255,0.3);
         }
 
-        @keyframes moveLogo { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
 
+        @keyframes rainbow {
+            0% { color: #ffffff; }
+            20% { color: #ffd700; }
+            40% { color: #00ffcc; }
+            60% { color: #ff00de; }
+            80% { color: #39ff14; }
+            100% { color: #ffffff; }
+        }
+
+        /* 3. የሚያምር ካርድ (Glassmorphism) */
         .card {
-            background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(15px);
-            padding: 30px; border-radius: 20px; box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-            border: 1px solid rgba(255, 255, 255, 0.18); width: 400px; text-align: center;
+            background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(20px);
+            padding: 35px; border-radius: 25px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3); width: 420px; text-align: center;
         }
 
-        .quote-text { font-size: 0.95rem; line-height: 1.6; margin-bottom: 20px; color: #ffffff; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); }
+        .quote-text { font-size: 1rem; line-height: 1.6; margin-bottom: 25px; color: #fff; font-weight: 500; }
 
-        input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: none; background: rgba(255, 255, 255, 0.2); color: white; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; margin-top: 15px; border-radius: 8px; border: none; background: #fff; color: #e73c7e; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        button:hover { background: #ffd700; color: #000; transform: scale(1.02); }
+        input {
+            width: 100%; padding: 14px; margin: 10px 0; border-radius: 10px; border: none;
+            background: rgba(255, 255, 255, 0.25); color: white; font-size: 1rem; box-sizing: border-box;
+        }
+        input::placeholder { color: #f0f0f0; }
+
+        button {
+            width: 100%; padding: 14px; margin-top: 20px; border-radius: 10px; border: none;
+            background: #ffffff; color: #e73c7e; font-weight: bold; font-size: 1.1rem;
+            cursor: pointer; transition: 0.4s; box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        button:hover { background: #ffd700; color: #000; transform: translateY(-3px); }
 
         .hidden { display: none; }
-        .switch-btn { margin-top: 15px; font-size: 0.85rem; cursor: pointer; text-decoration: underline; }
+        .switch-btn { margin-top: 20px; font-size: 0.9rem; cursor: pointer; text-decoration: underline; opacity: 0.9; }
     </style>
 </head>
 <body>
 
-    <div id="auth-container" class="card">
+    <div id="main-container" class="card">
         <div class="logo-text">WASIHUN-AI</div>
-        
-        <div id="signup-form">
+
+        <div id="signup-section">
             <p class="quote-text">"በቃላት የማይገለጹ ጥበቦችን፣ በምስል የማይታዩ ህልሞችን እና ሊደረሱ የማይችሉ ግቦችን በ WASIHUN-AI እገዛ አሳክተው ለዓለም ያሳዩ።"</p>
-            <input type="text" id="regName" placeholder="ሙሉ ስም">
-            <input type="tel" id="regPhone" value="+251">
-            <input type="email" id="regEmail" placeholder="Gmail">
-            <input type="password" id="regPass" placeholder="Password (6 ድጂት)" maxlength="6">
-            <button onclick="handleSignUp()">Sign Up</button>
-            <p class="switch-btn" onclick="toggleAuth()">አካውንት አለኝ? Login</p>
+            <input type="text" id="name" placeholder="ሙሉ ስም">
+            <input type="tel" id="phone" value="+251">
+            <input type="email" id="email" placeholder="Gmail">
+            <input type="password" id="pass" placeholder="Password (6 ድጂት)" maxlength="6">
+            <button onclick="doSignUp()">Sign Up</button>
+            <p class="switch-btn" onclick="showLogin()">አካውንት አለኝ? Login</p>
         </div>
 
-        <div id="login-form" class="hidden">
+        <div id="login-section" class="hidden">
             <p class="quote-text">"ከመረጃም በላይ ዕውቀትን፣ ከቴክኖሎጂም በላይ ግንኙነትን የሚፈጥር፤ WASIHUN-AI የዲጂታል ጉዞዎ ብሩህ ፋኖስ።"</p>
-            <input type="email" id="loginEmail" placeholder="Gmail">
-            <input type="password" id="loginPass" placeholder="Password" maxlength="6">
-            <button onclick="handleLogin()">Login</button>
-            <p class="switch-btn" onclick="toggleAuth()">አዲስ ነኝ? Sign Up</p>
+            <input type="email" id="l-email" placeholder="Gmail">
+            <input type="password" id="l-pass" placeholder="Password" maxlength="6">
+            <button onclick="doLogin()">Login</button>
+            <p class="switch-btn" onclick="showSignup()">አዲስ ነኝ? Sign Up</p>
         </div>
-    </div>
 
-    <div id="dashboard" class="card hidden" style="width: 85%; max-width: 600px;">
-        <div class="logo-text">WASIHUN-AI</div>
-        <h2 id="welcomeMessage">እንኳን በደህና መጡ!</h2>
-        <div id="ai-section">
-            <textarea id="aiPrompt" style="width:100%; height:80px; border-radius:10px; padding:10px; margin-bottom:10px;" placeholder="ጥያቄዎን እዚህ ይጻፉ..."></textarea>
-            <button onclick="askAI()">AIን ጠይቅ</button>
-            <p id="aiResponse" style="margin-top:15px; font-weight:bold;"></p>
+        <div id="dashboard" class="hidden">
+            <h2 id="greet">እንኳን በደህና መጡ!</h2>
+            <p style="margin-bottom: 20px;">የዲጂታል ጉዞዎ እዚህ ይጀምራል...</p>
+            <div style="background: rgba(0,0,0,0.1); padding: 15px; border-radius: 10px; text-align: left;">
+                <p>✨ የትምህርት ጥያቄዎች መልስ</p>
+                <p>🎨 ምስል ማቀናበሪያ</p>
+                <p>📝 የፈተና ዝግጅት</p>
+            </div>
+            <button onclick="location.reload()" style="background: #ff4757; color: white;">Logout</button>
         </div>
-        <button onclick="location.reload()" style="background: #ff4b2b; color: white; margin-top: 20px;">Logout</button>
     </div>
 
     <script>
-        // Supabase Initialization
-        const SUPABASE_URL = 'https://jdyrjrqgelfnditlpveb.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpkeXJqcnFnZWxmbmRpdGxwdmViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYwMTY3MTMsImV4cCI6MjA5MTU5MjcxM30.KZIF4VD3SrjLd-KQ_gA0Z9BcxSJR_Ty1x4FYPiI_q4o';
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // Supabase ግንኙነት
+        const S_URL = 'https://jdyrjrqgelfnditlpveb.supabase.co';
+        const S_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpkeXJqcnFnZWxmbmRpdGxwdmViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYwMTY3MTMsImV4cCI6MjA5MTU5MjcxM30.KZIF4VD3SrjLd-KQ_gA0Z9BcxSJR_Ty1x4FYPiI_q4o';
+        const client = supabase.createClient(S_URL, S_KEY);
 
-        function toggleAuth() {
-            document.getElementById('signup-form').classList.toggle('hidden');
-            document.getElementById('login-form').classList.toggle('hidden');
+        function showLogin() {
+            document.getElementById('signup-section').classList.add('hidden');
+            document.getElementById('login-section').classList.remove('hidden');
         }
 
-        async function handleSignUp() {
-            const name = document.getElementById('regName').value;
-            const email = document.getElementById('regEmail').value;
-            const phone = document.getElementById('regPhone').value;
-            const pass = document.getElementById('regPass').value;
+        function showSignup() {
+            document.getElementById('login-section').classList.add('hidden');
+            document.getElementById('signup-section').classList.remove('hidden');
+        }
 
-            if(!name || !email || pass.length !== 6) {
-                alert("እባክዎን መረጃዎችን በትክክል ይሙሉ!"); return;
+        // የምዝገባ ስራ
+        async function doSignUp() {
+            const n = document.getElementById('name').value;
+            const e = document.getElementById('email').value;
+            const p = document.getElementById('phone').value;
+            const pw = document.getElementById('pass').value;
+
+            if(!n || !e || pw.length !== 6) {
+                alert("እባክዎን ሁሉንም በትክክል ይሙሉ!"); return;
             }
 
-            // Supabase Auth + Database
-            const { data, error } = await supabase.from('profiles').insert([
-                { full_name: name, email: email, phone_number: phone }
-            ]);
+            const btn = document.querySelector("button");
+            btn.innerText = "በመመዝገብ ላይ...";
+            btn.disabled = true;
 
-            if (error) { alert("ስህተት፡ " + error.message); } 
-            else { 
-                localStorage.setItem('userName', name);
-                alert("ተመዝግበዋል! አሁን Login ያድርጉ።"); 
-                toggleAuth(); 
+            const { error } = await client.from('profiles').insert([{ full_name: n, email: e, phone_number: p }]);
+
+            if (error) {
+                alert("ስህተት፦ " + error.message);
+                btn.innerText = "Sign Up"; btn.disabled = false;
+            } else {
+                localStorage.setItem('user', n);
+                localStorage.setItem('mail', e);
+                localStorage.setItem('code', pw);
+                alert("ተመዝግበዋል! አሁን Login ያድርጉ።");
+                showLogin();
             }
         }
 
-        function handleLogin() {
-            // ለጊዜው በLocalStorage እናረጋግጣለን
-            const name = localStorage.getItem('userName') || "ተጠቃሚ";
-            document.getElementById('auth-container').classList.add('hidden');
-            document.getElementById('dashboard').classList.remove('hidden');
-            document.getElementById('welcomeMessage').innerText = `እንኳን በደህና መጡ ${name}!`;
-        }
-
-        function askAI() {
-            const prompt = document.getElementById('aiPrompt').value;
-            if(!prompt) return;
-            document.getElementById('aiResponse').innerText = "በማሰብ ላይ ነኝ... (AI API ሲቀጠል መልሱ እዚህ ይታያል)";
+        // የመግቢያ ስራ
+        function doLogin() {
+            const e = document.getElementById('l-email').value;
+            const pw = document.getElementById('l-pass').value;
+            
+            if(e === localStorage.getItem('mail') && pw === localStorage.getItem('code')) {
+                document.getElementById('signup-section').classList.add('hidden');
+                document.getElementById('login-section').classList.add('hidden');
+                document.getElementById('dashboard').classList.remove('hidden');
+                document.getElementById('greet').innerText = "እንኳን በደህና መጡ " + localStorage.getItem('user') + "!";
+            } else {
+                alert("ኢሜይል ወይም ፓስዎርድ ተሳስቷል!");
+            }
         }
     </script>
 </body>
