@@ -3,80 +3,155 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WASIHUN-AI</title>
+    <title>WASIHUN-AI | Voice Mode</title>
     <style>
-        /* የገጹ ውበት (CSS) */
+        /* የሚያምር ጥቁር እና ወርቃማ ዲዛይን */
         body {
-            margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif;
-            background: linear-gradient(-45deg, #0f0c29, #302b63, #24243e, #00d2ff);
-            background-size: 400% 400%; animation: gradientBG 15s ease infinite;
-            height: 100vh; display: flex; justify-content: center; align-items: center; color: white; overflow: hidden;
+            margin: 0; padding: 0;
+            background: radial-gradient(circle, #1a1a2e, #0f0c29);
+            height: 100vh; display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
         }
-        @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-        .logo-text { font-size: 2.5rem; font-weight: 900; text-align: center; margin-bottom: 20px; color: #ffd700; }
-        .card { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); padding: 25px; border-radius: 25px; width: 90%; max-width: 420px; text-align: center; border: 1px solid rgba(255, 255, 255, 0.2); }
-        .chat-box { background: rgba(0,0,0,0.3); height: 300px; overflow-y: auto; padding: 15px; border-radius: 15px; text-align: left; margin-bottom: 15px; }
-        textarea { width: 100%; height: 60px; border-radius: 12px; border: none; padding: 12px; background: rgba(255, 255, 255, 0.2); color: white; box-sizing: border-box; resize: none; font-size: 1rem; }
-        button { width: 100%; padding: 12px; border-radius: 12px; border: none; background: #ffd700; color: #000; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 1rem; }
-        .ai-m { color: #ffd700; margin-top: 8px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; line-height: 1.5; }
-        .user-m { color: #fff; margin-top: 8px; padding-left: 5px; }
+
+        .container { text-align: center; width: 90%; max-width: 400px; }
+
+        .mic-circle {
+            width: 140px; height: 140px;
+            background: #ffd700; border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 60px; cursor: pointer;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
+            transition: all 0.3s ease;
+            margin: 0 auto;
+        }
+
+        /* ድምፅ ሲያዳምጥ የሚፈጠር አኒሜሽን */
+        .listening {
+            background: #ff4757;
+            animation: pulse 1.2s infinite;
+            box-shadow: 0 0 50px rgba(255, 71, 87, 0.6);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        #status {
+            margin-top: 40px; font-size: 1.3rem;
+            color: #ffd700; font-weight: 500;
+            min-height: 60px; line-height: 1.4;
+        }
+
+        .hint { margin-top: 10px; font-size: 0.9rem; opacity: 0.6; }
     </style>
 </head>
 <body>
 
-    <div class="card">
-        <div class="logo-text">WASIHUN-AI</div>
-        <div id="chatDisplay" class="chat-box">
-            <div class="ai-m"><b>WASIHUN-AI:</b> ሰላም! እኔ WASIHUN-AI ነኝ። ዛሬ በምን ልርዳህ?</div>
-        </div>
-        <textarea id="userInput" placeholder="ጥያቄዎን እዚህ ይጻፉ..."></textarea>
-        <button id="askBtn" onclick="askAI()">ላክ</button>
+    <div class="container">
+        <div id="micBtn" class="mic-circle" onclick="toggleMic()">🎤</div>
+        <div id="status">ለመጀመር ማይኩን ይጫኑ</div>
+        <div class="hint">በድምፅ ብቻ የሚሰራ</div>
     </div>
 
     <script>
-        const API_KEY = "AIzaSyCDPT8UvR9sApQR30yS1hhB-0XfYfOg-zY"; 
+        // 1. ኤፒአይ መረጃዎች
+        const API_KEY = "AIzaSyCDPT8UvR9sApQR30yS1hhB-0XfYfOg-zY";
+        // የ 404 ስህተትን ለመፍታት ወደ v1beta ተቀይሯል
         const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
 
-        async function askAI() {
-            const input = document.getElementById('userInput');
-            const display = document.getElementById('chatDisplay');
-            const btn = document.getElementById('askBtn');
-            const text = input.value.trim();
+        // 2. የድምፅ መስማት ዝግጅት
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+            document.getElementById('status').innerText = "ይቅርታ፣ ብሮውዘርህ ድምፅ አይቀበልም። Chrome ተጠቀም።";
+        }
+        
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'am-ET'; // አማርኛ እንዲሰማ
+        recognition.interimResults = false;
 
-            if (!text) return;
+        let isListening = false;
 
-            // የተጠቃሚውን ጥያቄ ማሳየት
-            display.innerHTML += `<div class="user-m"><b>እርስዎ:</b> ${text}</div>`;
-            input.value = "";
-            btn.innerText = "በማሰብ ላይ...";
-            btn.disabled = true;
-            display.scrollTop = display.scrollHeight;
+        function toggleMic() {
+            if (!isListening) {
+                try {
+                    recognition.start();
+                    isListening = true;
+                } catch (e) { console.error(e); }
+            } else {
+                recognition.stop();
+                isListening = false;
+            }
+        }
 
+        recognition.onstart = () => {
+            document.getElementById('micBtn').classList.add('listening');
+            document.getElementById('status').innerText = "እያዳመጥኩ ነው... ተናገር";
+        };
+
+        recognition.onend = () => {
+            document.getElementById('micBtn').classList.remove('listening');
+            isListening = false;
+        };
+
+        recognition.onresult = async (event) => {
+            const userText = event.results[0][0].transcript;
+            document.getElementById('status').innerText = "የሰማሁት፡ " + userText;
+            
+            // AIውን መጠየቅ
+            await askWASIHUN(userText);
+        };
+
+        // 3. ከ AI ጋር መነጋገር
+        async function askWASIHUN(prompt) {
+            document.getElementById('status').innerText = "WASIHUN-AI በማሰብ ላይ...";
+            
             try {
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        contents: [{ parts: [{ text: text }] }],
-                        systemInstruction: {
-                            parts: [{ text: "የአንተ ስም WASIHUN-AI ነው። አንተ የኢትዮጵያ የቴክኖሎጂ ረዳት ነህ። ሁልጊዜ ስምህ ሲጠየቅ እኔ WASIHUN-AI ነኝ በል። መልሶችህ አጭር ይሁኑ።" }]
+                        contents: [{ parts: [{ text: prompt }] }],
+                        systemInstruction: { 
+                            parts: [{ text: "የአንተ ስም WASIHUN-AI ነው። አንተ የድምፅ ረዳት ስለሆንክ መልሶችህ በጣም አጭር፣ ግልጽ እና በአማርኛ ይሁኑ።" }] 
                         }
                     })
                 });
 
                 const data = await response.json();
-                const aiText = data.candidates[0].content.parts[0].text;
                 
-                // የ AIውን መልስ ማሳየት
-                display.innerHTML += `<div class="ai-m"><b>WASIHUN-AI:</b> ${aiText}</div>`;
-                
-            } catch (e) {
-                display.innerHTML += `<div style="color:red; margin-top:10px;">ይቅርታ፣ ስህተት ተፈጥሯል።</div>`;
-            } finally {
-                btn.innerText = "ላክ";
-                btn.disabled = false;
-                display.scrollTop = display.scrollHeight;
+                if (data.candidates && data.candidates[0].content) {
+                    const aiResponse = data.candidates[0].content.parts[0].text;
+                    document.getElementById('status').innerText = aiResponse;
+                    speak(aiResponse);
+                } else {
+                    throw new Error("No candidates");
+                }
+            } catch (error) {
+                console.error(error);
+                document.getElementById('status').innerText = "ይቅርታ፣ ስህተት ተፈጥሯል። ድጋሚ ይሞክሩ።";
             }
+        }
+
+        // 4. መልሱን በድምፅ እንዲናገር (Text-to-Speech)
+        function speak(text) {
+            const synth = window.speechSynthesis;
+            const utter = new SpeechSynthesisUtterance(text);
+            utter.lang = 'am-ET'; // በአማርኛ እንዲያነብ
+            
+            utter.onstart = () => {
+                document.getElementById('micBtn').style.opacity = "0.5";
+            };
+            
+            utter.onend = () => {
+                document.getElementById('micBtn').style.opacity = "1";
+                document.getElementById('status').innerText = "ለመቀጠል ማይኩን ይጫኑ";
+            };
+
+            synth.speak(utter);
         }
     </script>
 </body>
