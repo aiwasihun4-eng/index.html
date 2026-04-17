@@ -3,205 +3,190 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZAGWAE Saving and Credit System</title>
+    <title>ZAGWAE SAVING & CREDIT SYSTEM</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root {
-            --primary: #38bdf8;
-            --bg: #0f172a;
-            --card: #1e293b;
-            --gradient: linear-gradient(270deg, #ff0000, #ffff00, #00ff00, #0000ff, #8b00ff);
+        :root { --primary: #38bdf8; --bg: #0f172a; --card: #1e293b; --success: #22c55e; --danger: #ef4444; }
+        body { background-color: var(--bg); color: #f1f5f9; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        
+        /* የሚቀያየር ህብረ ቀለም ርዕስ */
+        .header-title {
+            font-size: 3rem; font-weight: 900; text-align: center;
+            background: linear-gradient(270deg, #ff0000, #ffff00, #00ff00, #0000ff, #8b00ff);
+            background-size: 800% 800%; animation: rainbow 10s linear infinite;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 20px 0;
         }
-
-        body {
-            background-color: var(--bg);
-            color: #f1f5f9;
-            font-family: 'Segoe UI', sans-serif;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-        }
-
-        /* ርዕስ በህብረ ቀለም */
-        .zagwae-header {
-            font-size: 3rem;
-            font-weight: 900;
-            background: var(--gradient);
-            background-size: 800% 800%;
-            animation: rainbow 10s linear infinite;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin: 30px 0;
-            text-align: center;
-        }
-
         @keyframes rainbow { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
 
-        .container {
-            background: var(--card);
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            width: 90%;
-            max-width: 800px;
-            margin-bottom: 50px;
-        }
-
+        .container { background: var(--card); padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 100%; max-width: 750px; margin-bottom: 20px; }
         .hidden { display: none; }
+        input, select, button { width: 100%; padding: 14px; margin: 10px 0; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: white; font-size: 1rem; box-sizing: border-box; }
+        button { background: var(--primary); color: #0f172a; font-weight: bold; border: none; cursor: pointer; transition: 0.3s; }
+        button:hover { opacity: 0.9; transform: translateY(-2px); }
+
+        /* የደንበኛ መረጃ ሳጥን */
+        .info-card { background: #334155; padding: 20px; border-radius: 12px; border-left: 6px solid var(--primary); margin: 15px 0; }
+        .info-card h3 { margin: 0; color: var(--primary); }
+        .info-card p { margin: 5px 0; font-size: 1.1rem; }
         
-        input, select, button {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border-radius: 8px;
-            border: 1px solid #475569;
-            background: #0f172a;
-            color: white;
-            box-sizing: border-box;
-        }
-
-        button {
-            background: var(--primary);
-            color: #0f172a;
-            font-weight: bold;
-            cursor: pointer;
-            border: none;
-        }
-
-        button:hover { opacity: 0.9; transform: scale(1.01); }
-
-        .role-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-        }
-
-        .role-btn {
-            background: #334155;
-            padding: 20px;
-            border-radius: 12px;
-            cursor: pointer;
-            text-align: center;
-            border: 2px solid transparent;
-        }
-
-        .role-btn:hover { border-color: var(--primary); }
-
-        .nav-btns { display: flex; gap: 10px; margin-top: 20px; }
-        .back-btn { background: #64748b; color: white; }
+        .nav-bar { display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 750px; margin-bottom: 10px; }
+        .logout-btn { background: var(--danger); width: auto; padding: 8px 20px; color: white; }
     </style>
 </head>
 <body>
 
-    <h1 class="zagwae-header">ZAGWAE SAVING & CREDIT</h1>
+    <h1 class="header-title">ZAGWAE SACCO</h1>
 
-    <div id="loginSection" class="container">
-        <h2>ሰራተኛ መለያ</h2>
+    <div id="loginArea" class="container">
+        <h2 style="text-align: center;">ሰራተኛ መለያ</h2>
         <input type="text" id="userInput" placeholder="Username">
         <input type="password" id="passInput" placeholder="Password">
-        <button onclick="checkLogin()">ግባ</button>
+        <button onclick="authLogin()">ግባ</button>
     </div>
 
     <div id="managerPanel" class="container hidden">
-        <h2 style="color: #60a5fa;">Main Manager Dashboard</h2>
-        <div class="role-grid">
-            <button onclick="alert('ሰራተኞችን የማገድ ስልጣን ተከፍቷል')">ሰራተኛ አግድ</button>
-            <button onclick="alert('ሁሉንም Username መቀየር ትችላለህ')">Credential ቀይር</button>
+        <div class="nav-bar"><h2>MAIN MANAGER</h2> <button class="logout-btn" onclick="logout()">ውጣ</button></div>
+        <div class="info-card"><h3>የቁጥጥር ማዕከል</h3><p>ሰራተኞችን መመዝገብና መቆጣጠር ትችላለህ።</p></div>
+        <button onclick="toggleView('staffForm')">አዲስ ሰራተኛ መዝግብ</button>
+        <div id="staffForm" class="hidden">
+            <input type="text" id="sUser" placeholder="የሰራተኛው Username">
+            <input type="text" id="sPass" placeholder="የሰራተኛው Password">
+            <select id="sRole">
+                <option value="cashier">Cashier (ገንዘብ ያዥ)</option>
+                <option value="submanager">Sub-Manager (አካውንት ከፋች)</option>
+                <option value="auditor">Auditor (ተቆጣጣሪ)</option>
+            </select>
+            <button style="background: var(--success);" onclick="addStaff()">መዝግብ</button>
         </div>
-        <button class="back-btn" onclick="logout()">ውጣ</button>
     </div>
 
     <div id="subManagerPanel" class="container hidden">
-        <h2 style="color: #c084fc;">Sub-Manager - አዲስ ደንበኛ መመዝገቢያ</h2>
+        <div class="nav-bar"><h2>SUB-MANAGER</h2> <button class="logout-btn" onclick="logout()">ውጣ</button></div>
+        <h3>አዲስ ደንበኛ መመዝገቢያ</h3>
         <input type="text" id="cName" placeholder="ሙሉ ስም">
         <select id="cGender"><option>ጾታ</option><option>ወንድ</option><option>ሴት</option></select>
-        <input type="text" id="cFayda" placeholder="የፋይዳ መታወቂያ">
-        <input type="text" id="cPhone" placeholder="ስልክ ቁጥር">
+        <input type="text" id="cFayda" placeholder="የፋይዳ መታወቂያ / መታወቂያ ቁጥር">
+        <input type="number" id="cAge" placeholder="እድሜ">
         <button onclick="registerCustomer()">አካውንት ክፈት (Generate 9 Digit)</button>
-        <p id="regStatus"></p>
-        <button class="back-btn" onclick="logout()">ውጣ</button>
+        <div id="regStatus"></div>
     </div>
 
     <div id="cashierPanel" class="container hidden">
-        <h2 style="color: #fbbf24;">Cashier - ዝውውር (Deposit/Withdraw)</h2>
-        <input type="text" id="tAcc" placeholder="የደንበኛ አካውንት ቁጥር">
+        <div class="nav-bar"><h2>CASHIER</h2> <button class="logout-btn" onclick="logout()">ውጣ</button></div>
+        <input type="text" id="searchAcc" placeholder="የደንበኛ አካውንት ቁጥር ያስገቡ" oninput="liveSearch()">
+        
+        <div id="customerDisplay" class="info-card hidden">
+            <h3 id="dispName">...</h3>
+            <p>አካውንት፡ <span id="dispAcc"></span></p>
+            <p>ቀሪ ሂሳብ፡ <span id="dispBal" style="color: var(--success); font-weight: bold;"></span> ETB</p>
+        </div>
+
         <input type="number" id="tAmount" placeholder="የብር መጠን">
         <div style="display: flex; gap: 10px;">
-            <button style="background: #22c55e;" onclick="handleTx('deposit')">Deposit</button>
-            <button style="background: #ef4444;" onclick="handleTx('withdraw')">Withdraw</button>
+            <button style="background: var(--success);" onclick="processTx('deposit')">ገንዘብ አስገባ (DEPOSIT)</button>
+            <button style="background: var(--danger); color: white;" onclick="processTx('withdraw')">ገንዘብ ክፈል (WITHDRAW)</button>
         </div>
-        <p id="txStatus"></p>
-        <button class="back-btn" onclick="logout()">ውጣ</button>
     </div>
 
     <div id="auditorPanel" class="container hidden">
-        <h2 style="color: #4ade80;">Auditor - የክትትል ሪፖርት</h2>
-        <div id="auditReport" style="background: #0f172a; padding: 20px; border-radius: 10px;">
-            በመጫን ላይ...
+        <div class="nav-bar"><h2>AUDITOR</h2> <button class="logout-btn" onclick="logout()">ውጣ</button></div>
+        <div id="auditSummary" class="info-card">
+            <h3>ጠቅላላ የፋይናንስ ሁኔታ</h3>
+            <p id="totalCap">በመጫን ላይ...</p>
         </div>
-        <button class="back-btn" onclick="logout()">ውጣ</button>
     </div>
 
     <script>
-        // Supabase Configuration
-        const S_URL = 'https://jdyrjrqgelfnditlpveb.supabase.co';
-        const S_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpkeXJqcnFnZWxmbmRpdGxwdmViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYwMTY3MTMsImV4cCI6MjA5MTU5MjcxM30.KZIF4VD3SrjLd-KQ_gA0Z9BcxSJR_Ty1x4FYPiI_q4o';
-        const _supabase = supabase.createClient(S_URL, S_KEY);
+        // Supabase Initialization
+        const SUPABASE_URL = 'https://jdyrjrqgelfnditlpveb.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpkeXJqcnFnZWxmbmRpdGxwdmViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYwMTY3MTMsImV4cCI6MjA5MTU5MjcxM30.KZIF4VD3SrjLd-KQ_gA0Z9BcxSJR_Ty1x4FYPiI_q4o';
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        function checkLogin() {
+        // Authentication Logic
+        async function authLogin() {
             const u = document.getElementById('userInput').value;
             const p = document.getElementById('passInput').value;
 
-            document.getElementById('loginSection').classList.add('hidden');
+            // Main Manager Login
+            if(u === "Was*6324" && p === "632436821221") { showPanel('managerPanel'); return; }
 
-            if(u === "Was*6324" && p === "632436821221") document.getElementById('managerPanel').classList.remove('hidden');
-            else if(u === "Was*6324" && p === "12345678") document.getElementById('subManagerPanel').classList.remove('hidden');
-            else if(u === "Was*6324" && p === "87654321") document.getElementById('cashierPanel').classList.remove('hidden');
-            else if(u === "Wass*6324" && p === "12345678") {
-                document.getElementById('auditorPanel').classList.remove('hidden');
-                loadAudit();
+            // Other Staff Check
+            const { data: staff, error } = await _supabase.from('staff').select('*').eq('username', u).eq('password', p).single();
+            if(staff) {
+                if(staff.role === 'cashier') showPanel('cashierPanel');
+                else if(staff.role === 'submanager') showPanel('subManagerPanel');
+                else if(staff.role === 'auditor') { showPanel('auditorPanel'); loadAudit(); }
+            } else { alert("መለያህ አልተገኘም! እባክህ ማናጀሩን አነጋግር።"); }
+        }
+
+        // Live Search for Cashier
+        async function liveSearch() {
+            const acc = document.getElementById('searchAcc').value;
+            if(acc.length < 9) { document.getElementById('customerDisplay').classList.add('hidden'); return; }
+
+            const { data: customer } = await _supabase.from('customers').select('*').eq('account_number', acc).single();
+            if(customer) {
+                document.getElementById('dispName').innerText = customer.full_name;
+                document.getElementById('dispAcc').innerText = customer.account_number;
+                document.getElementById('dispBal').innerText = customer.balance.toLocaleString();
+                document.getElementById('customerDisplay').classList.remove('hidden');
             } else {
-                alert("ተሳስተሃል!");
-                document.getElementById('loginSection').classList.remove('hidden');
+                document.getElementById('customerDisplay').classList.add('hidden');
             }
         }
 
+        // Transaction Logic
+        async function processTx(type) {
+            const acc = document.getElementById('searchAcc').value;
+            const amt = parseFloat(document.getElementById('tAmount').value);
+            if(!acc || isNaN(amt)) return alert("መረጃ በትክክል ያስገቡ");
+
+            const { data: customer } = await _supabase.from('customers').select('*').eq('account_number', acc).single();
+            let newBal = type === 'deposit' ? customer.balance + amt : customer.balance - amt;
+
+            if(newBal < 0) return alert("በቂ ቀሪ ሂሳብ የለም!");
+
+            const { error } = await _supabase.from('customers').update({ balance: newBal }).eq('account_number', acc);
+            if(!error) { alert("ዝውውሩ ተሳክቷል!"); liveSearch(); document.getElementById('tAmount').value = ""; }
+        }
+
+        // Register Customer
         async function registerCustomer() {
             const acc = Math.floor(100000000 + Math.random() * 900000000).toString();
-            const { error } = await _supabase.from('customers').insert([
-                { 
-                    full_name: document.getElementById('cName').value,
-                    account_number: acc,
-                    fayda_id: document.getElementById('cFayda').value,
-                    balance: 0 
-                }
-            ]);
-            if(!error) document.getElementById('regStatus').innerText = "ተመዝግቧል! አካውንት ቁጥር፡ " + acc;
+            const { error } = await _supabase.from('customers').insert([{
+                full_name: document.getElementById('cName').value,
+                account_number: acc,
+                fayda_id: document.getElementById('cFayda').value,
+                balance: 0
+            }]);
+            if(!error) document.getElementById('regStatus').innerHTML = `<div class='info-card'>ተመዝግቧል! አካውንት ቁጥር፡ <b>${acc}</b></div>`;
         }
 
-        async function handleTx(type) {
-            const acc = document.getElementById('tAcc').value;
-            const amt = parseFloat(document.getElementById('tAmount').value);
-            
-            let { data: cust } = await _supabase.from('customers').select('*').eq('account_number', acc).single();
-            if(!cust) return alert("አልተገኘም");
-
-            let nb = type === 'deposit' ? cust.balance + amt : cust.balance - amt;
-            if(nb < 0) return alert("በቂ ብር የለም");
-
-            await _supabase.from('customers').update({ balance: nb }).eq('account_number', acc);
-            document.getElementById('txStatus').innerText = "ተሳክቷል! ቀሪ፡ " + nb;
+        // Add Staff (Manager Only)
+        async function addStaff() {
+            const { error } = await _supabase.from('staff').insert([{
+                username: document.getElementById('sUser').value,
+                password: document.getElementById('sPass').value,
+                role: document.getElementById('sRole').value
+            }]);
+            if(!error) { alert("ሰራተኛው ተመዝግቧል!"); document.getElementById('staffForm').classList.add('hidden'); }
         }
 
+        // Load Audit Report
         async function loadAudit() {
             const { data } = await _supabase.from('customers').select('balance');
             const total = data.reduce((sum, item) => sum + item.balance, 0);
-            document.getElementById('auditReport').innerText = "ጠቅላላ የተቀመጠ ገንዘብ (Total Deposit): " + total + " ETB";
+            document.getElementById('totalCap').innerText = "አጠቃላይ በቁጠባ ያለ ብር፡ " + total.toLocaleString() + " ETB";
         }
 
+        function showPanel(id) {
+            document.getElementById('loginArea').classList.add('hidden');
+            document.querySelectorAll('.container').forEach(c => c.classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+        }
+        function toggleView(id) { document.getElementById(id).classList.toggle('hidden'); }
         function logout() { location.reload(); }
+        function goBack() { location.reload(); }
     </script>
 </body>
 </html>
